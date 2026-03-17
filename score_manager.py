@@ -2,36 +2,39 @@ import csv
 from datetime import datetime
 import os
 
-# Global variable for current quiz file
-current_quiz_file = None
 DATA_FOLDER = "data/test_scores"
 SCORE_FILENAME = os.path.join(DATA_FOLDER, "quiz_scores.csv")
 
+current_quiz_file = None
+
+
+def ensure_file_exists():
+    """Create the scores folder and CSV file with headers if they don't exist."""
+    if not os.path.exists(DATA_FOLDER):
+        os.makedirs(DATA_FOLDER)
+    if not os.path.exists(SCORE_FILENAME):
+        with open(SCORE_FILENAME, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Timestamp", "Quiz Name", "Score", "Total"])
+
+
 def start_quiz(file):
+    """Sets the active quiz file for the session."""
     global current_quiz_file
     current_quiz_file = file
+    ensure_file_exists()
     print(f"Starting quiz: {current_quiz_file}")
-    # Load your quiz and start asking questions here...
 
-def ensure_file_exists(self):
-    """Create the file with headers if it does not exist."""
-    if not os.path.exists(self.filename):
-        with open(self.filename, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                "Test Saved"
-            ])
 
 def end_quiz(score, total):
-    """Call this function when the quiz ends."""
+    """Saves the final score to the CSV file."""
     global current_quiz_file
-
-    # Get timestamp for when the quiz ended
+    ensure_file_exists()
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # Save to CSV file
-    with open(SCORE_FILENAME, mode="a", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow([timestamp, current_quiz_file, score, total])
-
-    print(f"✅ Score saved to {SCORE_FILENAME}: {score}/{total}")
+    try:
+        with open(SCORE_FILENAME, mode="a", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow([timestamp, current_quiz_file, score, total])
+        print(f"Score saved: {score}/{total}")
+    except Exception as e:
+        print(f"Error saving score: {e}")
